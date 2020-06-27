@@ -9,9 +9,12 @@ namespace ArmyOfOne
 {
     class Tile : GameObject
     {
+        Rectangle position;
+
         public Tile(int x, int y, int width, int height) : base(x, y, width, height)
         {
             hitbox = new Rectangle(x, y, width, height);
+            position = new Rectangle(hitbox.X, hitbox.Y, hitbox.Width, hitbox.Height);
         }
     }
 }

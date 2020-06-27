@@ -64,5 +64,15 @@ namespace ArmyOfOne
             }
         }
 
+        //if the player's health is less than 0 then return the state to true
+        public bool Die()
+        {
+            if (this.health <= 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
     }
 }

@@ -95,6 +95,13 @@ namespace ArmyOfOne
             tiles[1].image = enemyImg;
             tiles[2].image = enemyImg;
             tiles[3].image = enemyImg;
+
+            //Boundries
+            tiles.Add(new Tile(-10, 0, 10, 700));
+            tiles.Add(new Tile(1000, 0, 10, 700));
+            tiles.Add(new Tile(0, -10, 1000, 10));
+            tiles.Add(new Tile(0, 700, 1000, 10));
+
         }
 
         /// <summary>
