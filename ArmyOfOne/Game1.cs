@@ -23,7 +23,7 @@ namespace ArmyOfOne
         private int spawnTimer;
 
         //The player class
-        private Player player = new Player(150, 150, 50, 50);
+        private Character1 player = new Character1(150, 150, 50, 50);
 
         //Attributes for zombies
         private List<Enemy> enemies = new List<Enemy>();

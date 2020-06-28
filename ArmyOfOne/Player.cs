@@ -13,13 +13,16 @@ namespace ArmyOfOne
         //Attributes
         int health;
         int score;
+        int power;
         private KeyboardState kState;
 
         private int prevX;
         private int prevY;
 
-        public Player(int x, int y, int width, int height) : base(x, y, width, height)
+        public Player(int x, int y, int width, int height, int hp, int pow) : base(x, y, width, height)
         {
+            health = hp;
+            power = pow;
             hitbox = new Rectangle(x, y, width, height);
         }
 
