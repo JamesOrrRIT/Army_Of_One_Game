@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ArmyOfOne
 {
@@ -21,6 +22,7 @@ namespace ArmyOfOne
         public Enemy(int x, int y, int width, int height) : base(x, y, width, height)
         {
             hitbox = new Rectangle(x, y, width, height);
+            health = 100;
         }
 
         //UPDATING THE ENEMY
@@ -45,6 +47,16 @@ namespace ArmyOfOne
             } else if(hitbox.Y > player.hitbox.Y)
             {
                 hitbox.Y -= 1;
+            }
+        }
+
+        //Drawing the health bar
+        public void drawBar(SpriteBatch spriteBatch)
+        {
+            //Drawing the health bar
+            if(health < 101)
+            {
+                spriteBatch.Draw(image, new Rectangle(hitbox.X, hitbox.Y - 15, health/2, 10), new Rectangle(0, 0, image.Width, image.Height), Color.White);
             }
         }
 

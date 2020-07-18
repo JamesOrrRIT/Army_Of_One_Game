@@ -27,5 +27,16 @@ namespace ArmyOfOne
                 spriteBatch.Draw(image, hitbox, new Rectangle(0, 0, image.Width, image.Height), Color.White);
             }
         }
+
+        //Checks to see if the object intersects with another game object
+        public bool intersects(GameObject obj)
+        {
+            if(obj.hitbox.Intersects(this.hitbox))
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

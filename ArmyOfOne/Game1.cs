@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -23,7 +24,7 @@ namespace ArmyOfOne
         private int spawnTimer;
 
         //The player class
-        private Character1 player = new Character1(150, 150, 50, 50);
+        private Player player = new Player(150, 150, 50, 50);
 
         //Attributes for zombies
         private List<Enemy> enemies = new List<Enemy>();
@@ -123,44 +124,72 @@ namespace ArmyOfOne
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            //Getting key states
             prevState = kState;
             kState = Keyboard.GetState();
 
             //Updating parts of the game depending on the state
-            //IF THE GAME IS ACTIVE
-            if (gameState == State.level)
-            {
-                //Updating the player
-                player.update();
-
-                //Updating the zombies
-                for(int i = 0; i < enemies.Count; i++)
-                {
-                    enemies[i].update(player);
-                }
-
-                //Seeing if the player collides with the walls
-                for(int i = 0; i < tiles.Count; i++)
-                {
-                    player.wallCollision(tiles[i]);
-                }
-
-                //Seeing if the enemies collides with the walls
-                for (int i = 0; i < tiles.Count; i++)
-                {
-                    for (int j = 0; j < enemies.Count; j++) {
-                        enemies[j].wallCollision(tiles[i]);
+            switch (gameState) {
+                //UPDATING THE GAMEPLAY
+                case State.level:
+                    //Updating the player
+                    player.update();
+                    
+                    //Updating the zombies
+                    for (int i = 0; i < enemies.Count; i++)
+                    {
+                        enemies[i].update(player);
                     }
-                }
-            }
-            //IF THE GAME IS ON THE MAIN MENU
-            else if(gameState == State.mainMenu)
-            {
-                if(isPressed(Keys.Enter))
-                {
-                    gameState = State.level;
-                }
+                    
+                    //Seeing if the player collides with the walls
+                    for (int i = 0; i < tiles.Count; i++)
+                    {
+                        player.wallCollision(tiles[i]);
+                    }
+                    
+                    //Seeing if the enemies collides with the walls
+                    for (int i = 0; i < tiles.Count; i++)
+                    {
+                        for (int j = 0; j < enemies.Count; j++) {
+                            enemies[j].wallCollision(tiles[i]);
+                        }
+                    }
+                    
+                    //Seeing if the player is hit by any zombies
+                    for (int i = 0; i < enemies.Count; i++)
+                    {
+                        if (enemies[i].intersects(player))
+                        {
+                            player.hurt(1);
+                        }
+                    }
+
+                    //Knowing if the game is over
+                    if(player.Die())
+                    {
+                        gameState = State.gameOver;
+                    }
+
+                    break;
+
+                //IF THE GAME IS ON THE MAIN MENU
+                case State.mainMenu:
+                    if (isPressed(Keys.Enter))
+                    {
+                        gameState = State.level;
+
+
+                        //Resetting the game
+                        player.reset();
+                    }
+                    break;
+
+                case State.gameOver:
+                    if (isPressed(Keys.Enter))
+                    {
+                        gameState = State.mainMenu;
+                    }
+                    break;
             }
 
 
@@ -179,30 +208,59 @@ namespace ArmyOfOne
             //Beginning the spritebatch
             spriteBatch.Begin();
 
-            //DRAWING THE GAMEPLAY
-            if (gameState == State.level)
+            switch(gameState)
             {
-                //Drawing the tiles
-                for (int i = 0; i < tiles.Count; i++)
-                {
-                    tiles[i].draw(spriteBatch);
-                }
+                //Drawing the title screen
+                case State.title:
+                    spriteBatch.DrawString(mainFont, "ARMY OF ONE", new Vector2(400, 100), Color.Red);
+                    break;
 
-                //Drawing the zombies
-                for (int i = 0; i < enemies.Count; i++)
-                {
-                    enemies[i].draw(spriteBatch);
-                }
+                //Drawing the main menu
+                case State.mainMenu:
+                    spriteBatch.DrawString(mainFont, "ARMY OF ONE", new Vector2(400, 100), Color.Red);
+                    spriteBatch.DrawString(mainFont, "Press Enter", new Vector2(400, 500), Color.Red);
+                    break;
 
-                //Drawing the player
-                player.draw(spriteBatch);
-            }
+                //Drawing the level select menu
+                case State.levelSelect:
 
-            //DRAWING THE MAIN MENU
-            else if(gameState == State.mainMenu)
-            {
-                spriteBatch.DrawString(mainFont, "ARMY OF ONE", new Vector2(400, 100), Color.Red);
-                spriteBatch.DrawString(mainFont, "Press Enter", new Vector2(400, 500), Color.Red);
+                //Drawing the gameplay
+                case State.level:
+                    //Drawing the tiles
+                    for (int i = 0; i < tiles.Count; i++)
+                    {
+                        tiles[i].draw(spriteBatch);
+                    }
+
+                    //Drawing the zombies
+                    for (int i = 0; i < enemies.Count; i++)
+                    {
+                        enemies[i].draw(spriteBatch);
+                    }
+
+                    //Drawing the zombies's health bars
+                    for (int i = 0; i < enemies.Count; i++)
+                    {
+                        enemies[i].drawBar(spriteBatch);
+                    }
+
+                    //Drawing the player
+                    player.draw(spriteBatch);
+
+                    //Drawing the player's hud
+                    player.drawHUD(spriteBatch, mainFont);
+
+                    //Drawing the round counter
+                    spriteBatch.DrawString(mainFont, "ROUND " + round, new Vector2(400, 100), Color.Red);
+
+                    break;
+
+                //Drawing the game over menu
+                case State.gameOver:
+                    spriteBatch.DrawString(mainFont, "GAME OVER", new Vector2(400, 100), Color.Red);
+                    spriteBatch.DrawString(mainFont, "FINAL SCORE: " + player.getScore(), new Vector2(400, 300), Color.Red);
+                    spriteBatch.DrawString(mainFont, "Press enter to play again...", new Vector2(400, 500), Color.Red);
+                    break;
             }
 
             //Ending the spriteBatch
