@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace ArmyOfOne
@@ -11,18 +12,15 @@ namespace ArmyOfOne
     class Player : GameObject
     {
         //Attributes
-        int health;
-        int score;
-        int power;
+        int health = 200;
+        int score = 0;
         private KeyboardState kState;
 
         private int prevX;
         private int prevY;
 
-        public Player(int x, int y, int width, int height, int hp, int pow) : base(x, y, width, height)
+        public Player(int x, int y, int width, int height) : base(x, y, width, height)
         {
-            health = hp;
-            power = pow;
             hitbox = new Rectangle(x, y, width, height);
         }
 
@@ -58,6 +56,33 @@ namespace ArmyOfOne
 
         }
 
+        public void drawHUD(SpriteBatch spriteBatch, SpriteFont font)
+        {
+            //Drawing information such as health and armor
+
+            //Health bar
+            if (health >= 0 && health <= 100)
+            {
+                spriteBatch.Draw(image, new Rectangle(50, 600, health * 2, 50), new Rectangle(0, 0, image.Width, image.Height), Color.White);
+            } else if(health > 100)
+            {
+                spriteBatch.Draw(image, new Rectangle(50, 600, 200, 50), new Rectangle(0, 0, image.Width, image.Height), Color.White);
+                spriteBatch.Draw(image, new Rectangle(50, 540, (health-100) * 2, 50), new Rectangle(0, 0, image.Width, image.Height), Color.White);
+            }
+        }
+
+        public void hurt(int damage)
+        {
+            //Damaging armor
+            if(health > 100)
+            {
+                health -= damage;
+            } else
+            {
+                health -= damage * 2;
+            }
+        }
+
         public void wallCollision(GameObject g)
         {
             if(g.hitbox.Intersects(hitbox))
@@ -75,6 +100,18 @@ namespace ArmyOfOne
                 return true;
             }
             return false;
+        }
+
+        public int getScore()
+        {
+            return score;
+        }
+
+        public void reset()
+        {
+            health = 200;
+            hitbox.X = 150;
+            hitbox.Y = 150;
         }
 
     }
