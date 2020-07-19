@@ -9,9 +9,9 @@ namespace ArmyOfOne
     class Character2 : Player
     {
         //character type 2
-        public Character2(int x, int y, int width, int height) : base(x, y, width, height, 5, 3)
+        public Character2(int x, int y, int width, int height) : base(x, y, width, height)
         {
-
+            health = 300;
         }
     }
 }

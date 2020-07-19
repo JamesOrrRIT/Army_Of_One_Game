@@ -12,7 +12,7 @@ namespace ArmyOfOne
     class Player : GameObject
     {
         //Attributes
-        int health = 200;
+        protected int health = 200;
         int score = 0;
         private KeyboardState kState;
 
