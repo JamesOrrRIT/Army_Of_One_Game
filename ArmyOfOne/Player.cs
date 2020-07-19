@@ -12,8 +12,9 @@ namespace ArmyOfOne
     class Player : GameObject
     {
         //Attributes
-        protected int health = 200;
+        int health = 200;
         int score = 0;
+        int direction = 3;
         private KeyboardState kState;
 
         private int prevX;
@@ -36,21 +37,25 @@ namespace ArmyOfOne
             if (kState.IsKeyDown(Keys.Left))
             {
                 hitbox.X -= 5;
+                direction = 4;
                 return;
             }
             if (kState.IsKeyDown(Keys.Right))
             {
                 hitbox.X += 5;
+                direction = 3;
                 return;
             }
             if (kState.IsKeyDown(Keys.Up))
             {
                 hitbox.Y -= 5;
+                direction = 1;
                 return;
             }
             if (kState.IsKeyDown(Keys.Down))
             {
                 hitbox.Y += 5;
+                direction = 2;
                 return;
             }
 
@@ -102,9 +107,10 @@ namespace ArmyOfOne
             return false;
         }
 
-        public int getScore()
+        public int Score
         {
-            return score;
+            get { return score; }
+            set { score = value; }
         }
 
         public void reset()
@@ -112,12 +118,12 @@ namespace ArmyOfOne
             health = 200;
             hitbox.X = 150;
             hitbox.Y = 150;
+            score = 0;
         }
 
-        public virtual void special()
+        public int getDirection()
         {
-
+            return direction;
         }
-
     }
 }
