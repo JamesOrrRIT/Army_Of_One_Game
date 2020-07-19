@@ -114,5 +114,10 @@ namespace ArmyOfOne
             hitbox.Y = 150;
         }
 
+        public virtual void special()
+        {
+
+        }
+
     }
 }
