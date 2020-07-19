@@ -54,7 +54,7 @@ namespace ArmyOfOne
         public void drawBar(SpriteBatch spriteBatch)
         {
             //Drawing the health bar
-            if(health < 101)
+            if(health < 100 && health > 0)
             {
                 spriteBatch.Draw(image, new Rectangle(hitbox.X, hitbox.Y - 15, health/2, 10), new Rectangle(0, 0, image.Width, image.Height), Color.White);
             }
@@ -69,7 +69,37 @@ namespace ArmyOfOne
             }
         }
 
-        //if the player's health is less than 0 then return the state to true
+        public override bool checkCollision(GameObject obj1)
+        {
+           
+            if (this.hitbox.Intersects(obj1.hitbox))
+            {
+               
+                if (obj1 is Projectile)
+                {
+                    Projectile proj = (Projectile)obj1;
+                    if (proj.FromPlayer == true)
+                    {
+                        this.health -= 20;
+                        return true;
+                    }
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
+
+        }
+
+        public void damage(int damage)
+        {
+            health -= damage;
+        }
+
+        //if the enemy's health is less than 0 then return the state to true
         public bool Die()
         {
             if (this.health <= 0)

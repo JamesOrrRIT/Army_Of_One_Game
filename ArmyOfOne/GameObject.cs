@@ -28,6 +28,12 @@ namespace ArmyOfOne
             }
         }
 
+        //check the bullet collision with enemy
+        public virtual bool checkCollision(GameObject obj1)
+        {
+            return false;
+        }
+
         //Checks to see if the object intersects with another game object
         public bool intersects(GameObject obj)
         {

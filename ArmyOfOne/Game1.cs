@@ -1,5 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -14,8 +18,9 @@ namespace ArmyOfOne
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        //Texture2D projectileImg;
         //Attributes
-        private enum State { title, mainMenu, levelSelect, level, gameOver};
+        private enum State { title, mainMenu, levelSelect, level, gameOver };
         private State gameState = State.mainMenu;
         private SpriteFont mainFont;
 
@@ -25,14 +30,20 @@ namespace ArmyOfOne
 
         //The player class
         private Player player = new Player(150, 150, 50, 50);
+        private Projectile projectile = new Projectile(150, 150, 5, 5);
 
         //Attributes for zombies
         private List<Enemy> enemies = new List<Enemy>();
         private Texture2D enemyImg;
+        Random rand = new Random();
+
+        //Attributes for projectiles
+        private List<Projectile> projectiles = new List<Projectile>();
 
         //Attributes for tiles
         private List<Tile> tiles = new List<Tile>();
         private Texture2D tileImg;
+
 
         //Keystates
         private KeyboardState kState;
@@ -59,6 +70,39 @@ namespace ArmyOfOne
             graphics.ApplyChanges();
 
             base.Initialize();
+
+            //Making the level
+            try
+            {
+                StreamReader sr = new StreamReader("customLevelGrid.txt");
+                String line = sr.ReadLine();
+                int row = 0;
+
+                //Going through each line
+                while (line != null)
+                {
+                    char[] letters = line.ToCharArray();
+
+                    for(int i = 0; i < line.Length; i+= 2)
+                    {
+                        if(letters[i] == '1')
+                        {
+                            tiles.Add(new Tile(50*i, 100*row, 100, 100));
+                            tiles[tiles.Count - 1].image = enemyImg;
+                        }
+                    }
+
+                    //Getting the next line
+                    line = sr.ReadLine();
+                    row += 1;
+                }
+
+                sr.Close();
+            }
+            catch
+            {
+
+            }
         }
 
         /// <summary>
@@ -80,22 +124,6 @@ namespace ArmyOfOne
             //Fonts
             mainFont = Content.Load<SpriteFont>("mainFont");
 
-
-            //ADDING 2 TEST ZOMBIES REMOVE THIS CODE LATER
-            enemies.Add(new Enemy(600, 50, 50, 50));
-            enemies.Add(new Enemy(300, 500, 50, 50));
-            enemies[0].image = enemyImg;
-            enemies[1].image = enemyImg;
-
-            //ADDING TEST TILES REMOVE THIS CODE LATER
-            tiles.Add(new Tile(0, 0, 100, 100));
-            tiles.Add(new Tile(100, 0, 100, 100));
-            tiles.Add(new Tile(200, 0, 100, 100));
-            tiles.Add(new Tile(300, 400, 100, 100));
-            tiles[0].image = enemyImg;
-            tiles[1].image = enemyImg;
-            tiles[2].image = enemyImg;
-            tiles[3].image = enemyImg;
 
             //Boundries
             tiles.Add(new Tile(-10, 0, 10, 700));
@@ -129,32 +157,58 @@ namespace ArmyOfOne
             kState = Keyboard.GetState();
 
             //Updating parts of the game depending on the state
-            switch (gameState) {
+            switch (gameState)
+            {
+
                 //UPDATING THE GAMEPLAY
                 case State.level:
+                    //ENDING A ROUND
+                    if (enemies.Count == 0)
+                    {
+                        //Starting the next round
+                        for (int i = 0; i < (round + 1) * 5; i++)
+                        {
+                            int val = rand.Next(2);
+                            int valY = rand.Next(650);
+                            Console.WriteLine(valY);
+                            if (val == 0)
+                            {
+                                enemies.Add(new Enemy(0, valY, 50, 50));
+                                enemies[enemies.Count - 1].image = enemyImg;
+                            }
+                            else
+                            {
+                                enemies.Add(new Enemy(950, valY, 50, 50));
+                                enemies[enemies.Count - 1].image = enemyImg;
+                            }
+                        }
+                        round += 1;
+                    }
+
                     //Updating the player
                     player.update();
-                    
+
                     //Updating the zombies
                     for (int i = 0; i < enemies.Count; i++)
                     {
                         enemies[i].update(player);
                     }
-                    
+
                     //Seeing if the player collides with the walls
                     for (int i = 0; i < tiles.Count; i++)
                     {
                         player.wallCollision(tiles[i]);
                     }
-                    
+
                     //Seeing if the enemies collides with the walls
                     for (int i = 0; i < tiles.Count; i++)
                     {
-                        for (int j = 0; j < enemies.Count; j++) {
+                        for (int j = 0; j < enemies.Count; j++)
+                        {
                             enemies[j].wallCollision(tiles[i]);
                         }
                     }
-                    
+
                     //Seeing if the player is hit by any zombies
                     for (int i = 0; i < enemies.Count; i++)
                     {
@@ -164,8 +218,48 @@ namespace ArmyOfOne
                         }
                     }
 
+                    //Shooting a projectile
+                    if (isPressed(Keys.Space))
+                    {
+                        projectiles.Add(new Projectile(player.hitbox.X + 22, player.hitbox.Y + 22, 15, 25));
+                        projectiles[projectiles.Count - 1].States = player.getDirection();
+                        projectiles[projectiles.Count - 1].image = enemyImg;
+                    }
+
+                    //Updating the projectiles
+                    for (int i = 0; i < projectiles.Count; i++)
+                    {
+                        projectiles[i].update();
+                        for (int j = 0; j < enemies.Count; j++)
+                        {
+                            //Injuring enemies
+                            if (enemies[j].intersects(projectiles[i]))
+                            {
+                                enemies[j].damage(projectiles[i].Damage);
+                                projectiles[i].Damage = 0;
+                            }
+                        }
+                    }
+
+                    //Removing dead zombies and projectiles
+                    for (int i = 0; i < enemies.Count; i++)
+                    {
+                        if (enemies[i].Die())
+                        {
+                            enemies.RemoveAt(i);
+                            player.Score += 1;
+                        }
+                    }
+                    for (int i = 0; i < projectiles.Count; i++)
+                    {
+                        if (projectiles[i].Damage == 0)
+                        {
+                            projectiles.RemoveAt(i);
+                        }
+                    }
+
                     //Knowing if the game is over
-                    if(player.Die())
+                    if (player.Die())
                     {
                         gameState = State.gameOver;
                     }
@@ -177,6 +271,9 @@ namespace ArmyOfOne
                     if (isPressed(Keys.Enter))
                     {
                         gameState = State.level;
+                        round = 0;
+                        enemies.Clear();
+                        projectiles.Clear();
 
 
                         //Resetting the game
@@ -208,7 +305,7 @@ namespace ArmyOfOne
             //Beginning the spritebatch
             spriteBatch.Begin();
 
-            switch(gameState)
+            switch (gameState)
             {
                 //Drawing the title screen
                 case State.title:
@@ -244,6 +341,12 @@ namespace ArmyOfOne
                         enemies[i].drawBar(spriteBatch);
                     }
 
+                    //Drawing the projectiles
+                    for (int i = 0; i < projectiles.Count; i++)
+                    {
+                        projectiles[i].draw(spriteBatch);
+                    }
+
                     //Drawing the player
                     player.draw(spriteBatch);
 
@@ -252,13 +355,17 @@ namespace ArmyOfOne
 
                     //Drawing the round counter
                     spriteBatch.DrawString(mainFont, "ROUND " + round, new Vector2(400, 100), Color.Red);
+                    projectile.draw(spriteBatch);
 
                     break;
+
+                //projectile
+
 
                 //Drawing the game over menu
                 case State.gameOver:
                     spriteBatch.DrawString(mainFont, "GAME OVER", new Vector2(400, 100), Color.Red);
-                    spriteBatch.DrawString(mainFont, "FINAL SCORE: " + player.getScore(), new Vector2(400, 300), Color.Red);
+                    spriteBatch.DrawString(mainFont, "FINAL SCORE: " + player.Score, new Vector2(400, 300), Color.Red);
                     spriteBatch.DrawString(mainFont, "Press enter to play again...", new Vector2(400, 500), Color.Red);
                     break;
             }
@@ -271,7 +378,7 @@ namespace ArmyOfOne
 
         public bool isPressed(Keys k)
         {
-            if(!prevState.IsKeyDown(k) && kState.IsKeyDown(k))
+            if (!prevState.IsKeyDown(k) && kState.IsKeyDown(k))
             {
                 return true;
             }
