@@ -13,6 +13,7 @@ namespace ArmyOfOne
         public Character1(int x, int y, int width, int height) : base(x, y, width, height)
         {
             health = 200;
+            damage = 5;
         }
 
         public override void special()

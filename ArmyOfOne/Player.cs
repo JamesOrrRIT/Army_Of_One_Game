@@ -12,13 +12,19 @@ namespace ArmyOfOne
     class Player : GameObject
     {
         //Attributes
-        int health = 200;
+        protected int health = 200;
+        protected int damage = 5;
         int score = 0;
         int direction = 3;
         private KeyboardState kState;
 
         private int prevX;
         private int prevY;
+
+        public int Damage
+        {
+            get { return damage; }
+        }
 
         public Player(int x, int y, int width, int height) : base(x, y, width, height)
         {

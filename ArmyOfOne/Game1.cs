@@ -30,7 +30,7 @@ namespace ArmyOfOne
 
         //The player class
         private Player player = new Player(150, 150, 50, 50);
-        private Projectile projectile = new Projectile(150, 150, 5, 5);
+        private Projectile projectile;
 
         //Attributes for zombies
         private List<Enemy> enemies = new List<Enemy>();
@@ -68,6 +68,7 @@ namespace ArmyOfOne
             graphics.PreferredBackBufferWidth = 1000;
             graphics.PreferredBackBufferHeight = 700;
             graphics.ApplyChanges();
+            projectile = new Projectile(150, 150, 5, player.Damage);
 
             base.Initialize();
 
